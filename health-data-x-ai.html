@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康數據 × AI｜生成式 AI 課程報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wine:#780000; --red:#c1121f; --cream:#fdf0d5; --navy:#003049; --sky:#669bbc;
+    --ink:#003049; --muted:rgba(0,48,73,.62); --rule:rgba(0,48,73,.22); --track:rgba(0,48,73,.10);
+    --serif:"Noto Serif TC","Songti TC","PMingLiU","Noto Serif CJK TC",serif;
+    --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Noto Sans CJK TC",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#2a2a2a;font-family:var(--sans);color:var(--ink)}
+  .deck{position:relative;width:100vw;height:100vh;padding-top:3vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .slide{position:absolute;width:min(94vw,calc(88vh*16/9));aspect-ratio:16/9;background:var(--cream);
+         padding:5% 7% 6%;display:none;flex-direction:column;overflow:hidden}
+  .slide.active{display:flex;animation:fade .4s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .kicker{font-size:clamp(10px,1.05vw,14px);letter-spacing:.18em;color:var(--red);font-weight:500;margin-bottom:.9em}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(22px,3.2vw,44px);line-height:1.35;color:var(--navy)}
+  h2{font-family:var(--serif);font-weight:700;font-size:clamp(18px,2.3vw,32px);line-height:1.35;color:var(--navy);
+     margin-bottom:.9em;padding-bottom:.45em;border-bottom:1px solid var(--rule)}
+  h3{font-family:var(--serif);font-weight:500;font-size:clamp(13px,1.4vw,19px);color:var(--navy);margin-bottom:.45em}
+  p,li,td,th{font-size:clamp(11px,1.28vw,18px);line-height:1.7}
+  b{font-weight:500;color:var(--navy)}
+  ul,ol{padding-left:1.3em} li{margin:.25em 0} li::marker{color:var(--sky)}
+  .muted{color:var(--muted)} .cite{color:var(--sky);font-size:.8em;white-space:nowrap;letter-spacing:.02em}
+  .grow{flex:1;min-height:0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:5%}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:4%}
+  .card{border-top:1px solid var(--navy);padding-top:.9em}
+  .card.coral{border-top-color:var(--wine)} .card.teal{border-top-color:var(--sky)} .card.amber{border-top-color:var(--red)}
+  .big{font-family:var(--serif);font-size:clamp(28px,4.4vw,60px);font-weight:700;line-height:1.05;color:var(--wine);letter-spacing:-.01em}
+  .big.teal{color:var(--navy)} .big.navy{color:var(--navy)}
+  .tag{display:inline-block;padding:.05em .1em;margin:0 1.1em .2em 0;color:var(--navy);font-size:.85em;border-bottom:1px solid var(--sky)}
+  .warn{border-left:2px solid var(--red);padding:.3em 0 .3em 1em;color:var(--navy)}
+  table{width:100%;border-collapse:collapse;border-top:1px solid var(--navy);border-bottom:1px solid var(--navy)}
+  th{font-weight:500;text-align:left;padding:.5em .6em;border-bottom:1px solid var(--rule);color:var(--navy)}
+  td{border-bottom:1px solid var(--rule);padding:.42em .6em}
+  tr:last-child td{border-bottom:0}
+  tr.hl td{color:var(--wine);font-weight:500}
+  .bars{display:flex;flex-direction:column;gap:.7em;margin-top:.4em}
+  .bar{display:grid;grid-template-columns:9.5em 1fr 6.5em;align-items:center;gap:.9em}
+  .bar .track{height:.45em;background:var(--track)}
+  .bar .fill{height:100%;background:var(--navy)}
+  .bar .fill.coral{background:var(--red)} .bar .fill.teal{background:var(--sky)}
+  .bar span{font-size:clamp(11px,1.2vw,16px)}
+  .eq{display:flex;align-items:flex-end;justify-content:center;gap:2.2%;flex-wrap:wrap;margin:3% 0 4%}
+  .eq .box{text-align:center;min-width:11%;padding-bottom:.4em;border-bottom:1px solid var(--rule)}
+  .eq .box b{display:block;font-family:var(--serif);font-weight:700;font-size:clamp(24px,3.6vw,50px);color:var(--navy);line-height:1.1}
+  .eq .box small{font-size:clamp(10px,1.05vw,14px);color:var(--muted)}
+  .eq .op{font-size:clamp(18px,2.4vw,32px);color:var(--sky);font-weight:300;padding-bottom:.6em}
+  .eq .box.res{border-bottom:2px solid var(--wine)} .eq .box.res b{color:var(--wine)}
+  .steps{counter-reset:s;list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:1.1em 5%;align-content:start;margin-top:1%}
+  .steps li{counter-increment:s;position:relative;padding-left:2.3em;margin:0}
+  .steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:.05em;font-family:var(--serif);
+       font-weight:700;color:var(--wine);font-size:1em}
+  .footer{position:absolute;left:7%;right:7%;bottom:3%;display:flex;justify-content:space-between;
+          font-size:clamp(9px,.9vw,12px);color:var(--muted);letter-spacing:.04em}
+  .title-slide{justify-content:center;background:var(--navy)}
+  .title-slide h1{color:var(--cream)}
+  .title-slide p{color:var(--cream)}
+  .title-slide .kicker{color:var(--sky)}
+  .title-slide .rule{width:3.5em;height:2px;background:var(--red);margin:1.4em 0}
+  .title-slide .meta{opacity:.85}
+  .title-slide .footer{color:var(--sky)}
+  .nav{position:fixed;top:10px;right:18px;display:flex;gap:8px;z-index:10}
+  .nav button{background:transparent;color:#ddd;border:1px solid rgba(255,255,255,.3);padding:5px 12px;cursor:pointer;font-size:13px;font-family:var(--sans)}
+  .nav button:hover{border-color:#fff;color:#fff}
+  .progress{position:fixed;left:0;top:0;height:2px;background:var(--red);transition:width .3s;z-index:10}
+  .hint{position:fixed;top:14px;left:18px;color:#999;font-size:12px}
+  @media print{
+    html,body{background:#fff}
+    .nav,.progress,.hint{display:none}
+    .deck{display:block;height:auto;padding:0}
+    .slide{display:flex!important;position:relative;width:100%;page-break-after:always;animation:none}
+    @page{size:landscape;margin:0}
+  }
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.3em 5%;align-content:start}
+  .mk{color:var(--wine);font-weight:500;text-align:center} .mk.o{color:var(--sky)}
+  td.c,th.c{text-align:center}
+  .figcap{font-size:clamp(9px,.95vw,13px);color:var(--muted);margin-top:.3em}
+  .refs p{font-size:clamp(9px,1.02vw,14px);line-height:1.55;margin-bottom:.75em;padding-left:2em;text-indent:-2em}
+  .take .n{font-family:var(--serif);font-weight:700;color:var(--wine);font-size:clamp(22px,3vw,40px);line-height:1}
+  .take p{font-size:clamp(13px,1.6vw,22px);margin-top:.6em;font-family:var(--serif);color:var(--navy)}
+  .inf{color:var(--red);font-size:.8em;white-space:nowrap}
+  p,li,td,th{font-size:clamp(12px,1.55vw,22px)}
+  h3{font-size:clamp(14px,1.75vw,24px)}
+  .grid2.grow,.steps.grow{align-content:center}
+  .steps{row-gap:1.7em}
+  .sm p,.sm td,.sm th{font-size:clamp(11px,1.22vw,17px)}
+  .f{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;pointer-events:none}
+  .f.on{opacity:1;transform:none;pointer-events:auto}
+  .x{cursor:pointer}
+  .plus::after{content:"＋";color:var(--sky);font-weight:400;font-size:.8em;margin-left:.35em}
+  .x.open .plus::after{content:"－"}
+  .more{display:none;color:var(--muted);font-size:.86em;margin-top:.35em;line-height:1.55}
+  .x.open .more{display:block}
+  .hot{cursor:pointer}
+  g.hot.sel rect{stroke-width:3.5px}
+  g.seg.sel line.vis{stroke:#780000}
+  circle.hot.sel{stroke:#003049;stroke-width:3px}
+  .bar.hot.sel span:first-child{color:var(--wine);font-weight:500}
+  .figinfo{min-height:1.7em;margin-top:.6em;padding-left:.8em;border-left:2px solid var(--sky);color:var(--wine);font-size:clamp(11px,1.25vw,17px)}
+  .quiz .q h3{font-size:clamp(12px,1.35vw,19px);min-height:3em}
+  .opt{display:block;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--rule);padding:.42em .1em;font-family:var(--sans);font-size:clamp(11px,1.22vw,17px);color:var(--navy);cursor:pointer}
+  .opt:hover{color:var(--wine)}
+  .opt.right{color:var(--wine);font-weight:500;border-bottom:2px solid var(--wine)}
+  .opt.right::after{content:"  ✓"}
+  .opt.wrong{color:var(--muted);text-decoration:line-through}
+  .fb{display:none;margin-top:.6em;font-size:clamp(10px,1.1vw,15px);color:var(--navy);border-left:2px solid var(--wine);padding-left:.7em;line-height:1.55}
+  .q.done .fb{display:block}
+  @media print{.f{opacity:1!important;transform:none!important}}
+  .vc{display:flex;flex-direction:column;justify-content:center}
+</style>
+</head>
+<body>
+<div class="hint">← → 翻頁｜F 全螢幕｜P 列印</div>
+<div class="nav"><button onclick="go(-1)">‹ 上一張</button><button onclick="go(1)">下一張 ›</button></div>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+<section class="slide title-slide">
+  <div class="kicker">生成式 AI 課程報告 ｜ 文獻整合</div>
+  <h1>健康數據 × AI</h1>
+  <div class="rule"></div>
+  <p style="font-size:clamp(14px,1.8vw,24px);font-family:var(--serif)">從資料、預測模型，到 AI 的可靠度</p>
+  <div class="footer"><span>2026</span><span>1</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">報告地圖</div>
+  <h2>5 篇文獻，各補上一塊拼圖</h2>
+  <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
+<table>
+<tr><th>子主題</th><th class="c">Omar 2025</th><th class="c">ADA 2026</th><th class="c">Lin 2022</th><th class="c">Kausch 2024</th><th class="c">Lubitz 2022</th></tr>
+<tr><td>健康數據</td><td class="mk">●</td><td class="mk">●</td><td class="mk">●</td><td class="mk">●</td><td class="mk">●</td></tr>
+<tr><td>NLP</td><td class="mk">●</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>預測模型</td><td></td><td class="mk">●</td><td class="mk">●</td><td class="mk">●</td><td class="mk">●</td></tr>
+<tr><td>AI</td><td class="mk">●</td><td></td><td class="mk">●</td><td class="mk o">○</td><td class="mk">●</td></tr>
+</table>
+<p class="figcap" style="margin-top:.8em">● 直接相關　○ 可當對照（Kausch 用傳統統計 <span class="cite">PDF p.5</span>）</p></div>
+  <div class="footer"><span>健康數據 × AI</span><span>2</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">健康數據 ①</div>
+  <h2>資料從哪來：四種資料型態</h2>
+  <div class="grid2 grow">
+<div class="card f x"><h3>單次檢查<span class="plus"></span></h3><p>急診心電圖＋抽血 <span class="cite">Lin p.1</span>；血糖 <span class="cite">ADA p.S51</span></p><div class="more">心電圖與抽血需在 1 小時內才納入 <span class="cite">Lin p.10</span></div></div>
+<div class="card f x"><h3>連續監測<span class="plus"></span></h3><p>NICU 監視器，<b>47,512</b> 住院日 <span class="cite">Kausch PDF p.6</span></p><div class="more">心電、胸阻抗、血氧三種波形 <span class="cite">Kausch PDF p.2–4</span></div></div>
+<div class="card f x"><h3>穿戴裝置<span class="plus"></span></h3><p>手錶 PPG，<b>455,699</b> 人 <span class="cite">Lubitz p.1415</span></p><div class="more">只用靜止時段，靠加速度計判斷 <span class="cite">Lubitz p.1416</span></div></div>
+<div class="card f x"><h3>文字<span class="plus"></span></h3><p><b>300</b> 例模擬病例 <span class="cite">Omar p.2</span></p><div class="more">每例只藏 1 個假資訊，長短兩版 <span class="cite">Omar p.2</span></div></div>
+</div>
+  <div class="footer"><span>健康數據 × AI</span><span>3</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">健康數據 ②</div>
+  <h2>預測目標：要有切點、持續時間與確認方式</h2>
+  <div class="grow" style="display:flex;flex-direction:column;justify-content:center"><table>
+<tr><th>結果</th><th>定義</th><th>來源</th></tr>
+<tr class="f"><td>糖尿病前期</td><td>A1C 5.7–6.4%，或 IGT、IFG</td><td><span class="cite">ADA p.S51</span></td></tr>
+<tr class="f"><td>晚發性敗血症</td><td>出生 72 小時後血液培養陽性，且抗生素 ≥5 天</td><td><span class="cite">Kausch PDF p.4</span></td></tr>
+<tr class="f"><td>心房顫動</td><td>心電圖上持續 ≥30 秒</td><td><span class="cite">Lubitz p.1417</span></td></tr>
+<tr class="f"><td>重度高鉀</td><td>血鉀 ≥6.5 mmol/L（共分 7 級）</td><td><span class="cite">Lin p.10</span></td></tr>
+</table></div>
+  <div class="footer"><span>健康數據 × AI</span><span>4</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">健康數據 ③</div>
+  <h2>預測特徵：由人挑，或讓模型自己學</h2>
+  <div class="grid2 grow">
+<div class="card f x"><h3>臨床風險因子<span class="plus"></span></h3><p>BMI、血糖、妊娠糖尿病史 <span class="cite">ADA p.S53–S56</span></p><div class="more">亞裔 BMI 切點較低，&gt;23 <span class="cite">ADA p.S52</span></div></div>
+<div class="card f x"><h3>事件指標<span class="plus"></span></h3><p>呼吸暫停、心跳過慢 <span class="cite">Kausch PDF p.4</span></p><div class="more">插管時無法算呼吸暫停，只在未插管時計算 <span class="cite">Kausch PDF p.4</span></div></div>
+<div class="card teal f x"><h3>原始波形<span class="plus"></span></h3><p>12 導程心電圖，模型自己學 <span class="cite">Lin p.10</span></p><div class="more">ECG12Net，82 層卷積神經網路 <span class="cite">Lin p.10</span></div></div>
+<div class="card teal f x"><h3>視窗序列<span class="plus"></span></h3><p>5 分鐘脈搏間隔 <span class="cite">Lubitz p.1416</span></p><div class="more">演算法細節未公開 <span class="cite">Lubitz p.1417</span></div></div>
+</div>
+<p class="figcap f">上排由人挑選，下排交給模型；越往下可解釋性越低 <span class="inf">⚠️ 推論</span></p>
+  <div class="footer"><span>健康數據 × AI</span><span>5</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">預測模型 ①</div>
+  <h2>「未來會不會發生」vs.「現在有沒有」</h2>
+  <div class="grow" style="display:flex;flex-direction:column;justify-content:center"><svg viewBox="0 0 960 300" width="100%" role="img" aria-label="時間序列結果標記：Kausch 與 Lubitz"><text x="20" y="24" font-size="16" fill="#003049" text-anchor="start" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">Kausch：每天一列，標記「未來 3 天內是否確診」</text><g class="hot cell" data-info="第 -5 天：距確診 3 天以上 → 標 0（Kausch PDF p.5）"><rect x="20" y="40" width="80" height="44" fill="#fdf0d5" stroke="#003049" stroke-width="1"/><text x="60.0" y="69" font-size="18" fill="#003049" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0</text></g><text x="60.0" y="106" font-size="13" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">-5</text><g class="hot cell" data-info="第 -4 天：距確診 3 天以上 → 標 0（Kausch PDF p.5）"><rect x="108" y="40" width="80" height="44" fill="#fdf0d5" stroke="#003049" stroke-width="1"/><text x="148.0" y="69" font-size="18" fill="#003049" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0</text></g><text x="148.0" y="106" font-size="13" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">-4</text><g class="hot cell" data-info="第 -3 天：距確診 3 天以上 → 標 0（Kausch PDF p.5）"><rect x="196" y="40" width="80" height="44" fill="#fdf0d5" stroke="#003049" stroke-width="1"/><text x="236.0" y="69" font-size="18" fill="#003049" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0</text></g><text x="236.0" y="106" font-size="13" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">-3</text><g class="hot cell" data-info="第 -2 天：落在「未來 3 天內」→ 標 1（Kausch PDF p.5）"><rect x="284" y="40" width="80" height="44" fill="#fdf0d5" stroke="#780000" stroke-width="2"/><text x="324.0" y="69" font-size="18" fill="#780000" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">1</text></g><text x="324.0" y="106" font-size="13" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">-2</text><g class="hot cell" data-info="第 -1 天：落在「未來 3 天內」→ 標 1（Kausch PDF p.5）"><rect x="372" y="40" width="80" height="44" fill="#fdf0d5" stroke="#780000" stroke-width="2"/><text x="412.0" y="69" font-size="18" fill="#780000" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">1</text></g><text x="412.0" y="106" font-size="13" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">-1</text><g class="hot cell" data-info="第 0 天：落在「未來 3 天內」→ 標 1（Kausch PDF p.5）"><rect x="460" y="40" width="80" height="44" fill="#fdf0d5" stroke="#780000" stroke-width="2"/><text x="500.0" y="69" font-size="18" fill="#780000" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">1</text></g><text x="500.0" y="106" font-size="13" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0（確診日）</text><g class="hot cell" data-info="+1 … +10：治療與恢復期，不納入分析（Kausch PDF p.5）"><rect x="548" y="40" width="240" height="44" fill="#fdf0d5" stroke="#669bbc" stroke-width="1.2" stroke-dasharray="5 4"/><text x="668.0" y="69" font-size="18" fill="#669bbc" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">排除</text></g><text x="668.0" y="106" font-size="13" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">+1 … +10</text><g class="hot cell" data-info="+11：恢復後重新開始 → 標 0（Kausch PDF p.5）"><rect x="796" y="40" width="80" height="44" fill="#fdf0d5" stroke="#003049" stroke-width="1"/><text x="836.0" y="69" font-size="18" fill="#003049" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0</text></g><text x="836.0" y="106" font-size="13" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">+11</text><line x1="284" y1="120" x2="540" y2="120" stroke="#780000" stroke-width="1.5"/><text x="412.0" y="142" font-size="14" fill="#780000" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">敗血症 = 1（確診日與前 2 天）</text><line x1="548" y1="120" x2="788" y2="120" stroke="#669bbc" stroke-width="1.5"/><text x="668.0" y="142" font-size="14" fill="#669bbc" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">治療與恢復期，不納入</text><text x="20" y="190" font-size="16" fill="#003049" text-anchor="start" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">Lubitz：5 分鐘視窗、重疊 50%，連續 11 段不規則才發通知</text><g class="hot seg" data-info="第 1 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="20" y1="214" x2="120" y2="214" stroke="transparent" stroke-width="14"/><line class="vis" x1="20" y1="214" x2="120" y2="214" stroke="#003049" stroke-width="3"/></g><line x1="20" y1="208" x2="20" y2="220" stroke="#003049" stroke-width="1.5"/><line x1="120" y1="208" x2="120" y2="220" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 2 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="75" y1="228" x2="175" y2="228" stroke="transparent" stroke-width="14"/><line class="vis" x1="75" y1="228" x2="175" y2="228" stroke="#003049" stroke-width="3"/></g><line x1="75" y1="222" x2="75" y2="234" stroke="#003049" stroke-width="1.5"/><line x1="175" y1="222" x2="175" y2="234" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 3 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="130" y1="214" x2="230" y2="214" stroke="transparent" stroke-width="14"/><line class="vis" x1="130" y1="214" x2="230" y2="214" stroke="#003049" stroke-width="3"/></g><line x1="130" y1="208" x2="130" y2="220" stroke="#003049" stroke-width="1.5"/><line x1="230" y1="208" x2="230" y2="220" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 4 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="185" y1="228" x2="285" y2="228" stroke="transparent" stroke-width="14"/><line class="vis" x1="185" y1="228" x2="285" y2="228" stroke="#003049" stroke-width="3"/></g><line x1="185" y1="222" x2="185" y2="234" stroke="#003049" stroke-width="1.5"/><line x1="285" y1="222" x2="285" y2="234" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 5 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="240" y1="214" x2="340" y2="214" stroke="transparent" stroke-width="14"/><line class="vis" x1="240" y1="214" x2="340" y2="214" stroke="#003049" stroke-width="3"/></g><line x1="240" y1="208" x2="240" y2="220" stroke="#003049" stroke-width="1.5"/><line x1="340" y1="208" x2="340" y2="220" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 6 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="295" y1="228" x2="395" y2="228" stroke="transparent" stroke-width="14"/><line class="vis" x1="295" y1="228" x2="395" y2="228" stroke="#003049" stroke-width="3"/></g><line x1="295" y1="222" x2="295" y2="234" stroke="#003049" stroke-width="1.5"/><line x1="395" y1="222" x2="395" y2="234" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 7 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="350" y1="214" x2="450" y2="214" stroke="transparent" stroke-width="14"/><line class="vis" x1="350" y1="214" x2="450" y2="214" stroke="#003049" stroke-width="3"/></g><line x1="350" y1="208" x2="350" y2="220" stroke="#003049" stroke-width="1.5"/><line x1="450" y1="208" x2="450" y2="220" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 8 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="405" y1="228" x2="505" y2="228" stroke="transparent" stroke-width="14"/><line class="vis" x1="405" y1="228" x2="505" y2="228" stroke="#003049" stroke-width="3"/></g><line x1="405" y1="222" x2="405" y2="234" stroke="#003049" stroke-width="1.5"/><line x1="505" y1="222" x2="505" y2="234" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 9 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="460" y1="214" x2="560" y2="214" stroke="transparent" stroke-width="14"/><line class="vis" x1="460" y1="214" x2="560" y2="214" stroke="#003049" stroke-width="3"/></g><line x1="460" y1="208" x2="460" y2="220" stroke="#003049" stroke-width="1.5"/><line x1="560" y1="208" x2="560" y2="220" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 10 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="515" y1="228" x2="615" y2="228" stroke="transparent" stroke-width="14"/><line class="vis" x1="515" y1="228" x2="615" y2="228" stroke="#003049" stroke-width="3"/></g><line x1="515" y1="222" x2="515" y2="234" stroke="#003049" stroke-width="1.5"/><line x1="615" y1="222" x2="615" y2="234" stroke="#003049" stroke-width="1.5"/><g class="hot seg" data-info="第 11 段：5 分鐘，每 2.5 分鐘取一段；連續 11 段不規則才通知（Lubitz p.1416）"><line x1="570" y1="214" x2="670" y2="214" stroke="transparent" stroke-width="14"/><line class="vis" x1="570" y1="214" x2="670" y2="214" stroke="#003049" stroke-width="3"/></g><line x1="570" y1="208" x2="570" y2="220" stroke="#003049" stroke-width="1.5"/><line x1="670" y1="208" x2="670" y2="220" stroke="#003049" stroke-width="1.5"/><line x1="684" y1="221" x2="726" y2="221" stroke="#780000" stroke-width="1.5"/><polyline points="718,215 726,221 718,227" fill="none" stroke="#780000" stroke-width="1.5"/><text x="736" y="227" font-size="16" fill="#780000" text-anchor="start" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">發出通知</text><line x1="20" y1="250" x2="670" y2="250" stroke="#669bbc" stroke-width="1.5"/><text x="345.0" y="274" font-size="14" fill="#669bbc" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">≥30 分鐘（連續 11 段），只用靜止時段</text></svg>
+<p class="figinfo">點格子或線段，看它怎麼標記</p>
+<p class="figcap">資料來源：Kausch et al. (2024), PDF p.5；Lubitz et al. (2022), p.1416。自製示意圖。</p></div>
+  <div class="footer"><span>健康數據 × AI</span><span>6</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">預測模型 ②</div>
+  <h2>六個可以直接借用的研究設計</h2>
+  <ol class="steps grow">
+<li class="f x"><b>黑盒子實用研究</b>：AI 背景運算，不給醫師看 <span class="cite">Lin p.10</span><span class="plus"></span><div class="more">醫師的處置不受 AI 影響，可以公平比較</div></li>
+<li class="f x"><b>外部驗證</b>：換一家醫院再測 <span class="cite">Lin p.2</span><span class="plus"></span><div class="more">兩院使用相同切點</div></li>
+<li class="f x"><b>逐步加入變項</b>，看 AUC 增益 <span class="cite">Kausch PDF p.5</span><span class="plus"></span><div class="more">只用 PMA 0.739 → 完整模型 0.783 <span class="cite">PDF p.18</span></div></li>
+<li class="f x"><b>校正重複測量</b> <span class="cite">Kausch PDF p.5；Omar p.3</span><span class="plus"></span><div class="more">Kausch 用 Huber-White；Omar 用混合效應模型</div></li>
+<li class="f x"><b>事先註冊</b>、固定演算法 <span class="cite">Lubitz p.1417</span><span class="plus"></span><div class="more">註冊編號 NCT04380415 <span class="cite">p.1415</span></div></li>
+<li class="f x"><b>事先計算樣本數</b> <span class="cite">Lubitz p.1417</span><span class="plus"></span><div class="more">目標 155 人、檢定力 80%</div></li>
+</ol>
+  <div class="footer"><span>健康數據 × AI</span><span>7</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">預測模型 ③</div>
+  <h2>表現要連驗證方式一起看</h2>
+  <div class="cols grow" style="grid-template-columns:1.7fr 1fr;gap:4%;align-items:center">
+<div><svg viewBox="0 0 800 312" width="100%" role="img" aria-label="各研究 AUC 點圖"><circle cx="200" cy="18" r="6" fill="#003049"/><text x="212" y="24" font-size="17" fill="#003049" text-anchor="start" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">教學醫院</text><circle cx="395" cy="18" r="6" fill="#780000"/><text x="407" y="24" font-size="17" fill="#003049" text-anchor="start" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">社區醫院（外部）</text><circle cx="590" cy="18" r="6" fill="#669bbc"/><text x="602" y="24" font-size="17" fill="#003049" text-anchor="start" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">交叉驗證（內部）</text><line x1="215.0" y1="40" x2="215.0" y2="262" stroke="rgba(0,48,73,.22)" stroke-width="1"/><text x="215.0" y="284" font-size="16" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.70</text><line x1="401.66666666666686" y1="40" x2="401.66666666666686" y2="262" stroke="rgba(0,48,73,.22)" stroke-width="1"/><text x="401.66666666666686" y="284" font-size="16" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.80</text><line x1="588.3333333333335" y1="40" x2="588.3333333333335" y2="262" stroke="rgba(0,48,73,.22)" stroke-width="1"/><text x="588.3333333333335" y="284" font-size="16" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.90</text><line x1="775.0000000000001" y1="40" x2="775.0000000000001" y2="262" stroke="rgba(0,48,73,.22)" stroke-width="1"/><text x="775.0000000000001" y="284" font-size="16" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">1.00</text><line x1="215" y1="262" x2="775" y2="262" stroke="#003049" stroke-width="1"/><text x="0" y="78" font-size="18" fill="#003049" text-anchor="start" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">Lin｜重度低鉀</text><line x1="215" y1="72" x2="775" y2="72" stroke="rgba(0,48,73,.22)" stroke-width="1" stroke-dasharray="2 4"/><circle class="hot pt" data-info="Lin｜重度低鉀｜教學醫院：AUC 0.9497（Lin p.2）" cx="681.1" cy="72" r="8" fill="#003049"/><text x="681.1066666666668" y="59" font-size="17" fill="#003049" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.9497</text><circle class="hot pt" data-info="Lin｜重度低鉀｜社區醫院（外部驗證）：AUC 0.9194（Lin p.2）" cx="624.5" cy="72" r="8" fill="#780000"/><text x="624.5466666666667" y="97" font-size="17" fill="#780000" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.9194</text><text x="0" y="130" font-size="18" fill="#003049" text-anchor="start" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">Lin｜重度高鉀</text><line x1="215" y1="124" x2="775" y2="124" stroke="rgba(0,48,73,.22)" stroke-width="1" stroke-dasharray="2 4"/><circle class="hot pt" data-info="Lin｜重度高鉀｜教學醫院：AUC 0.9658（Lin p.2）" cx="711.2" cy="124" r="8" fill="#003049"/><text x="711.1600000000001" y="111" font-size="17" fill="#003049" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.9658</text><circle class="hot pt" data-info="Lin｜重度高鉀｜社區醫院（外部驗證）：AUC 0.9865（Lin p.2）" cx="749.8" cy="124" r="8" fill="#780000"/><text x="749.8000000000002" y="149" font-size="17" fill="#780000" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.9865</text><text x="0" y="182" font-size="18" fill="#003049" text-anchor="start" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">Kausch｜只用 PMA</text><line x1="215" y1="176" x2="775" y2="176" stroke="rgba(0,48,73,.22)" stroke-width="1" stroke-dasharray="2 4"/><circle class="hot pt" data-info="Kausch｜只用 PMA｜10 折交叉驗證（內部）：AUC 0.739（Kausch PDF p.18）" cx="287.8" cy="176" r="8" fill="#669bbc"/><text x="287.80000000000007" y="163" font-size="17" fill="#669bbc" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.739</text><text x="0" y="234" font-size="18" fill="#003049" text-anchor="start" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">Kausch｜完整模型</text><line x1="215" y1="228" x2="775" y2="228" stroke="rgba(0,48,73,.22)" stroke-width="1" stroke-dasharray="2 4"/><circle class="hot pt" data-info="Kausch｜完整模型｜10 折交叉驗證（內部）：AUC 0.783（Kausch PDF p.18）" cx="369.9" cy="228" r="8" fill="#669bbc"/><text x="369.9333333333335" y="215" font-size="17" fill="#669bbc" text-anchor="middle" font-weight="500" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">0.783</text><text x="495" y="306" font-size="16" fill="rgba(0,48,73,.62)" text-anchor="middle" font-weight="400" style="font-family:Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif">AUC</text></svg><p class="figinfo">滑過或點圓點，看數字與出處</p><p class="figcap">資料來源：Lin et al. (2022), p.2；Kausch et al. (2024), PDF p.18。自製。</p></div>
+<div class="sm"><table>
+<tr><th>研究</th><th>驗證方式</th></tr>
+<tr><td>Lin</td><td>外部驗證（同體系社區醫院）<span class="cite">p.2</span></td></tr>
+<tr><td>Kausch</td><td>內部：10 折交叉驗證 <span class="cite">PDF p.5</span></td></tr>
+<tr><td>Lubitz</td><td>前瞻性，心電圖貼片為參考標準；敏感度 67.6% <span class="cite">p.1419</span></td></tr>
+</table>
+<p class="warn" style="margin-top:1em">任務與驗證方式不同，AUC 不能直接比高低 <span class="inf">⚠️ 推論</span></p></div></div>
+  <div class="footer"><span>健康數據 × AI</span><span>8</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">預測模型 ④</div>
+  <h2>自己跑模型需要的技術：以穿戴裝置偵測 AF 為例</h2>
+  <ol class="steps grow">
+<li class="f"><b>資料</b>：PPG＋心電圖標註</li>
+<li class="f"><b>前處理</b>：濾波、找峰值</li>
+<li class="f"><b>切視窗</b>：5 分鐘、重疊 50% <span class="cite">Lubitz p.1416</span></li>
+<li class="f"><b>特徵</b>：心率變異度</li>
+<li class="f"><b>模型</b>：XGBoost、CNN</li>
+<li class="f"><b>評估</b>：以「人」切分資料</li>
+</ol>
+<p class="figcap">原文未公開演算法；除標頁碼者外為一般做法 <span class="inf">⚠️ 推論</span></p>
+  <div class="footer"><span>健康數據 × AI</span><span>9</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">AI ①</div>
+  <h2>AI「判錯」，反而有訊號</h2>
+  <div class="cols grow" style="grid-template-columns:1.3fr 1fr;align-items:center">
+<table>
+<tr><th>組別（對照：血鉀正常）</th><th>30 天死亡 HR（95% CI）</th></tr>
+<tr><td>抽血高鉀</td><td>3.66（3.02–4.44）</td></tr>
+<tr class="hl"><td>抽血正常、AI 判低鉀</td><td>1.40（1.16–1.69）</td></tr>
+<tr class="hl"><td>抽血正常、AI 判高鉀</td><td>1.49（1.00–2.24）</td></tr>
+</table>
+<div class="card coral f"><h3>作者解釋</h3><p>模型可能學到造成血鉀異常的疾病特徵 <span class="cite">Lin p.9</span></p><p class="figcap" style="margin-top:.8em">HR 來源 <span class="cite">Lin p.2, p.4</span>；屬觀察性發現，不代表因果 <span class="inf">⚠️ 推論</span></p></div>
+</div>
+  <div class="footer"><span>健康數據 × AI</span><span>10</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">AI ② × NLP</div>
+  <h2>LLM 會被假資訊帶著走</h2>
+  <div class="cols grow" style="align-items:center">
+<div><div class="big">50–82%</div><p style="margin-top:.6em">6 個 LLM 照單全收的比例 <span class="cite">Omar p.1</span></p>
+<ul style="margin-top:1em"><li>防護指令有效（OR 0.27），但無法消除 <span class="cite">p.3</span></li><li>調低溫度無效 <span class="cite">p.3</span></li></ul></div>
+<div><h3>整體幻覺率</h3><div class="bars"><div class="bar hot" data-info="預設：各廠商標準設定，65.9%（Omar p.3）"><span>預設</span><div class="track"><div class="fill" style="width:65.9%;background:#003049"></div></div><span><b style="color:#003049">65.9%</b></span></div><div class="bar hot" data-info="防護指令：44.2%，OR 0.27（95% CI 0.23–0.32）（Omar p.3）"><span>防護指令</span><div class="track"><div class="fill" style="width:44.2%;background:#780000"></div></div><span><b style="color:#780000">44.2%</b></span></div><div class="bar hot" data-info="溫度 0：66.5%，OR 1.05，無顯著差異（Omar p.3）"><span>溫度 0</span><div class="track"><div class="fill" style="width:66.5%;background:#003049"></div></div><span><b style="color:#003049">66.5%</b></span></div></div><p class="figinfo">滑過或點長條，看細節</p><p class="figcap" style="margin-top:.6em">資料來源：Omar et al. (2025), p.3。自製。</p></div>
+</div>
+  <div class="footer"><span>健康數據 × AI</span><span>11</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">AI ③</div>
+  <h2>同樣叫 AI，可靠度差很多</h2>
+  <div class="grow vc"><div class="cols3">
+<div class="card coral f x"><h3>生成式 LLM<span class="plus"></span></h3><p>通用、讀文字，易被錯誤輸入誤導 <span class="cite">Omar p.3</span></p><div class="more">蒸餾模型 Distilled-DeepSeek-R1 最差，OR 8.41 <span class="cite">Omar p.3</span></div></div>
+<div class="card f x"><h3>單一任務深度學習<span class="plus"></span></h3><p>真實資料＋外部驗證，表現穩定 <span class="cite">Lin p.2</span></p><div class="more">比抽血報告早 42.8 分鐘 <span class="cite">Lin p.2</span></div></div>
+<div class="card teal f x"><h3>傳統統計<span class="plus"></span></h3><p>特徵可解釋，但只有內部驗證 <span class="cite">Kausch PDF p.5</span></p><div class="more">遵循 TRIPOD 報告規範 <span class="cite">Kausch PDF p.4</span></div></div>
+</div>
+<p class="warn f" style="margin-top:3em">先看任務、資料、驗證方式，再看數字 <span class="inf">⚠️ 推論</span></p></div>
+  <div class="footer"><span>健康數據 × AI</span><span>12</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">Limitations and Future Work</div>
+  <h2>作者自述的限制，指向下一步</h2>
+  <div class="cols grow" style="grid-template-columns:1.35fr 1fr">
+<div><h3>Limitations（作者自述）</h3><table>
+<tr><td>Omar</td><td>模擬病例；每題只跑一次 <span class="cite">p.6</span></td></tr>
+<tr><td>Lin</td><td>只有東亞族群；未評估提早處置 <span class="cite">p.10</span></td></tr>
+<tr><td>Kausch</td><td>以天為單位，可能錯過快速惡化 <span class="cite">PDF p.8</span></td></tr>
+<tr><td>Lubitz</td><td>敏感度不完美；參與者偏向既有使用者 <span class="cite">p.1423</span></td></tr>
+</table></div>
+<div class="card f"><h3>Future Work</h3><ul>
+<li>外部驗證：Kausch 只有內部驗證 <span class="cite">PDF p.5</span></li>
+<li>亞洲族群：Lubitz 亞裔僅 2.9% <span class="cite">p.1420</span></li>
+<li>真實病歷測 LLM <span class="cite">Omar p.6</span></li>
+<li>補 NLP 文獻：用病歷做預測 <span class="inf">⚠️ 推論</span></li>
+</ul></div></div>
+  <div class="footer"><span>健康數據 × AI</span><span>13</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">Critical Thinking</div>
+  <h2>讀 AI 研究時，先問這四個問題</h2>
+  <div class="grow" style="display:flex;flex-direction:column;justify-content:center"><table>
+<tr><th>問題</th><th>本次文獻的例子</th><th>來源</th></tr>
+<tr class="f x"><td><b>誰出資？</b><span class="plus"></span></td><td>Fitbit 出資；Kausch 兩位作者持股<div class="more">統計分析由麻州總醫院執行 <span class="cite">Lubitz p.1418</span></div></td><td><span class="cite">Lubitz p.1418；Kausch PDF p.1</span></td></tr>
+<tr class="f x"><td><b>誰當評審？</b><span class="plus"></span></td><td>GPT-4o 同時是受測模型與評審<div class="more">醫師抽查 200 筆，一致率 100% <span class="cite">Omar p.2–3</span></div></td><td><span class="cite">Omar p.2–3</span></td></tr>
+<tr class="f x"><td><b>驗證夠獨立嗎？</b><span class="plus"></span></td><td>外部驗證醫院屬同一醫療體系<div class="more">儀器與流程相近 <span class="cite">Lin p.2</span> <span class="inf">⚠️ 推論</span></div></td><td><span class="cite">Lin p.2</span></td></tr>
+<tr class="f x"><td><b>能重現嗎？</b><span class="plus"></span></td><td>資料或程式碼未公開<div class="more">Omar 資料需向作者索取 <span class="cite">Omar p.6</span></div></td><td><span class="cite">Lin p.11；Omar p.6；Lubitz p.1418</span></td></tr>
+</table><p class="figcap" style="margin-top:.8em">問題清單為本報告歸納 <span class="inf">⚠️ 推論</span>；這些不代表研究錯，而是解讀數字時要打折扣之處</p></div>
+  <div class="footer"><span>健康數據 × AI</span><span>14</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">小測驗</div>
+  <h2>三題，檢查自己聽懂了沒</h2>
+  <div class="cols3 grow quiz">
+<div class="q card"><h3>1. Kausch 怎麼標記「敗血症」？</h3>
+<button class="opt" data-ok="0">A 只有確診當天標 1</button><button class="opt" data-ok="1">B 確診日與前 2 天標 1</button><button class="opt" data-ok="0">C 住院期間全部標 1</button>
+<p class="fb">預測「未來 3 天內」，確診後 10 天排除 <span class="cite">Kausch PDF p.5</span></p></div>
+<div class="q card"><h3>2. 哪一篇做了外部驗證？</h3>
+<button class="opt" data-ok="1">A Lin</button><button class="opt" data-ok="0">B Kausch</button><button class="opt" data-ok="0">C Omar</button>
+<p class="fb">Lin 在同體系社區醫院驗證 <span class="cite">Lin p.2</span>；Kausch 只有 10 折交叉驗證 <span class="cite">Kausch PDF p.5</span></p></div>
+<div class="q card"><h3>3. 哪個方法能降低 LLM 幻覺？</h3>
+<button class="opt" data-ok="0">A 溫度調成 0</button><button class="opt" data-ok="1">B 加防護指令</button><button class="opt" data-ok="0">C 改用短版病例</button>
+<p class="fb">防護指令 65.9% → 44.2%；溫度 0 無效；短版反而稍微更容易出錯，OR 1.22 <span class="cite">Omar p.3</span></p></div>
+</div>
+  <div class="footer"><span>健康數據 × AI</span><span>15</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">Take-home</div>
+  <h2>三件帶回家的事</h2>
+  <div class="grow vc"><div class="cols3 take" style="align-items:start">
+<div class="card coral f"><div class="n">01</div><p>先定義結果與時間窗，再談模型</p></div>
+<div class="card coral f"><div class="n">02</div><p>驗證方式決定數字能信多少</p></div>
+<div class="card coral f"><div class="n">03</div><p>AI 不是同一種東西：看任務、資料、驗證</p></div>
+</div></div><p class="figcap">本報告歸納 <span class="inf">⚠️ 推論</span></p>
+  <div class="footer"><span>健康數據 × AI</span><span>16</span></div>
+</section>
+<section class="slide">
+  <div class="kicker">參考文獻</div>
+  <h2>References（APA 7）</h2>
+  <div class="refs grow"><p>American Diabetes Association Professional Practice Committee for Diabetes. (2026). 3. Prevention or delay of diabetes and associated comorbidities: Standards of care in diabetes—2026. <i>Diabetes Care, 49</i>(Suppl. 1), S50–S60. https://doi.org/10.2337/dc26-S003</p>
+<p>Kausch, S. L., Lake, D. E., Di Fiore, J. M., Weese-Mayer, D. E., Claure, N., Ambalavanan, N., Vesoulis, Z. A., Fairchild, K. D., Dennery, P. A., Hibbs, A. M., Martin, R. J., Indic, P., Travers, C. P., Bancalari, E., Hamvas, A., Kemp, J. S., Carroll, J. L., Moorman, J. R., Sullivan, B. A., &amp; the Prematurity-Related Ventilatory Control (Pre-Vent) Investigators. (2024). Apnea, intermittent hypoxemia, and bradycardia events predict late-onset sepsis in extremely preterm infants. <i>The Journal of Pediatrics, 271</i>, Article 114042. https://doi.org/10.1016/j.jpeds.2024.114042</p>
+<p>Lin, C., Chau, T., Lin, C.-S., Shang, H.-S., Fang, W.-H., Lee, D.-J., Lee, C.-C., Tsai, S.-H., Wang, C.-H., &amp; Lin, S.-H. (2022). Point-of-care artificial intelligence-enabled ECG for dyskalemia: A retrospective cohort analysis for accuracy and outcome prediction. <i>npj Digital Medicine, 5</i>, Article 8. https://doi.org/10.1038/s41746-021-00550-0</p>
+<p>Lubitz, S. A., Faranesh, A. Z., Selvaggi, C., Atlas, S. J., McManus, D. D., Singer, D. E., Pagoto, S., McConnell, M. V., Pantelopoulos, A., &amp; Foulkes, A. S. (2022). Detection of atrial fibrillation in a large population using wearable devices: The Fitbit Heart Study. <i>Circulation, 146</i>, 1415–1424. https://doi.org/10.1161/CIRCULATIONAHA.122.060291</p>
+<p>Omar, M., Sorin, V., Collins, J. D., Reich, D., Freeman, R., Gavin, N., Charney, A., Stump, L., Bragazzi, N. L., Nadkarni, G. N., &amp; Klang, E. (2025). Multi-model assurance analysis showing large language models are highly vulnerable to adversarial hallucination attacks during clinical decision support. <i>Communications Medicine, 5</i>, Article 330. https://doi.org/10.1038/s43856-025-01021-3</p></div>
+  <div class="footer"><span>健康數據 × AI</span><span>17</span></div>
+</section>
+</div>
+<script>  const slides=[...document.querySelectorAll('.slide')];
+  let i=0, step=0;
+  const frags=s=>[...s.querySelectorAll('.f')];
+  function paint(){frags(slides[i]).forEach((f,k)=>f.classList.toggle('on',k<step));}
+  function show(n,all){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    step=all?frags(slides[i]).length:0; paint();
+    document.getElementById('progress').style.width=((i+1)/slides.length*100)+'%';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+  }
+  function next(){const n=frags(slides[i]).length; if(step<n){step++;paint()} else if(i<slides.length-1) show(i+1,false)}
+  function prev(){if(step>0){step--;paint()} else if(i>0) show(i-1,true)}
+  function go(d){d>0?next():prev()}
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'))return;
+    if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();next()}
+    else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev()}
+    else if(e.key==='Home')show(0,false);
+    else if(e.key==='End')show(slides.length-1,true);
+    else if(e.key==='f'||e.key==='F'){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(err){}}
+    else if(e.key==='p'||e.key==='P'){window.print()}
+  });
+  document.querySelectorAll('.x').forEach(el=>el.addEventListener('click',e=>{if(e.target.closest('a,button'))return;el.classList.toggle('open')}));
+  document.querySelectorAll('[data-info]').forEach(el=>{
+    const f=()=>{const box=el.closest('.slide');const out=box&&box.querySelector('.figinfo');if(out)out.textContent=el.dataset.info;
+      box.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));el.classList.add('sel')};
+    el.addEventListener('click',f);el.addEventListener('mouseenter',f)});
+  document.querySelectorAll('.q').forEach(q=>q.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
+    q.querySelectorAll('.opt').forEach(o=>{o.classList.remove('right','wrong');if(o.dataset.ok==='1')o.classList.add('right')});
+    if(b.dataset.ok!=='1')b.classList.add('wrong');q.classList.add('done');b.blur()})));
+  let x0=null;
+  document.addEventListener('touchstart',e=>{x0=e.touches[0].clientX});
+  document.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)go(dx<0?1:-1);x0=null});
+  const h=parseInt(location.hash.slice(1));show(isNaN(h)?0:h-1,!isNaN(h));
+</script>
+</body>
+</html>
